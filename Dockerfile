@@ -36,4 +36,4 @@ FROM alpine:latest as prod
 COPY --from=builder /app/todo /usr/local/bin/todo
 EXPOSE 5000
 
-ENTRYPOINT [ "/usr/local/bin/todo" ]
+ENTRYPOINT ["/usr/local/bin/todo"]
