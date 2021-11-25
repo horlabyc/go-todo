@@ -13,7 +13,7 @@ type TodoHandler struct {
 
 func (handler TodoHandler) GetAll(c *fiber.Ctx) error {
 	var todos []Todo = handler.repository.FindAll()
-	return c.JSON(todos)
+	return c.JSON(SendSuccessResponse(todos, "todos"))
 }
 
 func (handler TodoHandler) Get(c *fiber.Ctx) error {
@@ -70,9 +70,15 @@ func (handler TodoHandler) Update(c *fiber.Ctx) error {
 	if err := c.BodyParser(todoData); err != nil {
 		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
 	}
-	todo.Name = todoData.Name
-	todo.Description = todoData.Description
-	todo.Status = todoData.Status
+	if todoData.Name != "" {
+		todo.Name = todoData.Name
+	}
+	if todoData.Description != "" {
+		todo.Description = todoData.Description
+	}
+	if todoData.Status != "" {
+		todo.Status = todoData.Status
+	}
 	item, err := handler.repository.Save(todo)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -117,4 +123,13 @@ func Register(router fiber.Router, database *gorm.DB) {
 	todoRouter.Put("/:id", todoHandler.Update)
 	todoRouter.Post("/", todoHandler.Create)
 	todoRouter.Delete("/:id", todoHandler.Delete)
+}
+
+func SendSuccessResponse(data interface{}, key string) *fiber.Map {
+	return &fiber.Map{
+		"status": "success",
+		"data": fiber.Map{
+			key: data,
+		},
+	}
 }
